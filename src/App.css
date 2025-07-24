@@ -1,0 +1,104 @@
+/* Mobile-first responsive design */
+.App {
+  text-align: center;
+  min-height: 100vh;
+  width: 100%;
+}
+
+/* Mobile responsiveness utilities */
+@media (max-width: 640px) {
+  .text-4xl {
+    font-size: 2rem !important;
+  }
+  
+  .text-5xl {
+    font-size: 2.5rem !important;
+  }
+  
+  .text-6xl {
+    font-size: 3rem !important;
+  }
+  
+  .p-8 {
+    padding: 1rem !important;
+  }
+  
+  .p-6 {
+    padding: 1rem !important;
+  }
+  
+  pre {
+    font-size: 0.75rem !important;
+  }
+  
+  code {
+    word-break: break-all !important;
+  }
+}
+
+/* Tablet responsiveness */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .text-4xl {
+    font-size: 2.5rem !important;
+  }
+  
+  .text-5xl {
+    font-size: 3rem !important;
+  }
+  
+  .text-6xl {
+    font-size: 3.5rem !important;
+  }
+}
+
+/* Custom scrollbar for code blocks */
+pre::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+
+pre::-webkit-scrollbar-track {
+  background: #1f2937;
+}
+
+pre::-webkit-scrollbar-thumb {
+  background: #4b5563;
+  border-radius: 4px;
+}
+
+pre::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
+
+/* Loading spinner animation */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Button hover effects */
+button {
+  transition: all 0.3s ease;
+}
+
+/* Responsive grid */
+.grid {
+  display: grid;
+  gap: 1rem;
+}
+
+/* Safe area for mobile devices */
+@supports (padding: max(0px)) {
+  .min-h-screen {
+    min-height: calc(100vh - env(safe-area-inset-bottom));
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
