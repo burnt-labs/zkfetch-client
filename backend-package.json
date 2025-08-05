@@ -1,0 +1,32 @@
+{
+  "name": "zkfetch-bybit-backend",
+  "version": "1.0.0",
+  "description": "Backend server for handling Bybit API authentication for zkFetch demo",
+  "main": "backend-server.js",
+  "scripts": {
+    "start": "node backend-server.js",
+    "dev": "nodemon backend-server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "axios": "^1.6.0",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "keywords": [
+    "zkfetch",
+    "bybit",
+    "api",
+    "backend",
+    "authentication"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0"
+  }
+} 
