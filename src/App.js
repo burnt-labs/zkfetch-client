@@ -53,6 +53,48 @@ function App() {
       }],
       description: 'Verify GitHub repository count'
     },
+    iceandfire: {
+      name: 'Ice & Fire Data',
+      url: 'https://anapioficeandfire.com/api/houses/378',
+      method: 'GET',
+      responseMatches: [
+        {
+          type: 'regex',
+          value: '"name":\\s*"(?<house_name>[^"]+)"'
+        },
+        {
+          type: 'regex',
+          value: '"words":\\s*"(?<house_words>[^"]*)"'
+        },
+      ],
+      responseRedactions: [
+        {
+          regex: '"name":\\s*"(?<house_name>[^"]+)"'
+        },
+        {
+          regex: '"words":\\s*"(?<house_words>[^"]*)"'
+        }
+      ],
+      description: 'Prove Game of Thrones house data from Ice & Fire API '
+    },
+    bybit: {
+      name: 'Crypto believer. More than 20K in Bybit',
+      url: 'https://4882fcf3c1c1.ngrok-free.app/api/wallet-balance',
+      method: 'GET',
+      responseMatches: [
+        {
+          type: "regex", 
+          value: `"accountType":"(.*)"`
+        }
+      ],
+      responseRedactions: [
+        {
+          jsonPath: `$.result.list[?(@.totalEquity > 20000)].accountType`,
+          regex: `"accountType":"(.*)"`,
+        }
+      ],
+      description: 'Verify if total equity is greater than 20k'
+    },
     jsonplaceholder: {
       name: 'JSONPlaceholder POST',
       url: 'https://jsonplaceholder.typicode.com/posts',
@@ -85,7 +127,6 @@ function App() {
 
     try {
       const example = examples[selectedExample];
-      
       toast.loading(`Fetching data from ${example.name}...`, { id: 'fetching' });
       
       const fetchOptions = {
@@ -102,49 +143,73 @@ function App() {
           responseRedactions: example.responseRedactions
         }
       );
-      
+
       console.log('Raw proof data:', data);
       setProofData(data);
       
       // Transform proof for on-chain use
       const transformed = transformProofForChain(data);
       setTransformedProof(transformed);
+
+      // Special handling for Bybit proof
+      if (selectedExample === 'bybit') {
+        toast.success(
+          <div>
+            <p className="font-bold">🎉 Congratulations!</p>
+            <p>It is proved that you have more than 20K in your Bybit account.</p>
+            <p className="text-sm mt-2">You can now use this proof for verification.</p>
+          </div>, 
+          { 
+            id: 'fetching',
+            duration: 5000 
+          }
+        );
+      } else {
+        toast.success('Proof generated successfully!', { id: 'fetching' });
+      }
       
-      toast.success('Proof generated successfully!', { id: 'fetching' });
       setIsFetching(false);
-      
       return data;
+
     } catch (error) {
       setIsFetching(false);
       const errorMessage = error?.message || 'An unexpected error occurred';
       
-      // Log full error for debugging
-      console.error('zkFetch error details:', {
-        message: error.message,
-        stack: error.stack,
-        error: error
-      });
-      
-      // Check if it's an authentication error
-      if (errorMessage.includes('Application not found') || errorMessage.includes('404')) {
+      // Special handling for Bybit proof failure
+      if (selectedExample === 'bybit') {
         toast.error(
           <div>
-            <p className="font-semibold">Reclaim Authentication Error</p>
-            <p className="text-sm mt-1">Your credentials are not recognized by Reclaim Protocol.</p>
-            <p className="text-xs mt-2">Please check:</p>
-            <ul className="text-xs list-disc list-inside">
-              <li>Your app is registered at dev.reclaimprotocol.org</li>
-              <li>Credentials are copied correctly</li>
-              <li>No extra quotes or spaces in .env file</li>
-            </ul>
-          </div>, 
+            <p className="font-bold">Your claim was not proved</p>
+            <p>Sorry, we couldn't verify that you have more than 20K in your Bybit account.</p>
+            <p className="text-sm mt-2 text-gray-300">This could be because the amount is less than 20K or there was an error accessing the account.</p>
+          </div>,
           { 
             id: 'fetching',
-            duration: 10000,
+            duration: 5000 
           }
         );
       } else {
-        toast.error(`Failed to generate proof: ${errorMessage}`, { id: 'fetching' });
+        // Original error handling for other examples
+        if (errorMessage.includes('Application not found') || errorMessage.includes('404')) {
+          toast.error(
+            <div>
+              <p className="font-semibold">Reclaim Authentication Error</p>
+              <p className="text-sm mt-1">Your credentials are not recognized by Reclaim Protocol.</p>
+              <p className="text-xs mt-2">Please check:</p>
+              <ul className="text-xs list-disc list-inside">
+                <li>Your app is registered at dev.reclaimprotocol.org</li>
+                <li>Credentials are copied correctly</li>
+                <li>No extra quotes or spaces in .env file</li>
+              </ul>
+            </div>, 
+            { 
+              id: 'fetching',
+              duration: 10000,
+            }
+          );
+        } else {
+          toast.error(`Failed to generate proof: ${errorMessage}`, { id: 'fetching' });
+        }
       }
     }
   };
@@ -214,16 +279,34 @@ function App() {
             >
               @reclaimprotocol/zk-fetch
             </a>{" "}
-            to fetch data from{" "}
+            to fetch data from multiple APIs including{" "}
             <a 
               href="https://api.coingecko.com/api/v3/global" 
               target="_blank" 
               rel="noreferrer"
               className="text-green-400 font-semibold hover:underline transition-colors duration-300"
             >
-              CoinGecko API
+              CoinGecko
+            </a>,{" "}
+            <a 
+              href="https://anapioficeandfire.com/" 
+              target="_blank" 
+              rel="noreferrer"
+              className="text-purple-400 font-semibold hover:underline transition-colors duration-300"
+            >
+              Ice & Fire [Game of Thrones]
+            </a>, 
+            <a 
+              href="https://testnet.bybit.com/" 
+              target="_blank" 
+              rel="noreferrer"
+              className="text-purple-400 font-semibold hover:underline transition-colors duration-300"
+            >
+              Bybit Testnet
             </a>{" "}
-            and generate a proof
+            
+             and GitHub APIs{" "}
+            and generate proofs
           </h2>
 
           <button
@@ -271,12 +354,15 @@ function App() {
                 </h3>
                 
                 <div className="space-y-4">
-                  <div>
-                    <h4 className="text-lg font-semibold text-green-400 mb-2">Extracted Data:</h4>
-                    <pre className="text-gray-300 bg-gray-800 p-3 rounded">
-                      {JSON.stringify(proofData.extractedParameterValues || {}, null, 2)}
-                    </pre>
-                  </div>
+                  {/* Only show extracted data if NOT Bybit example */}
+                  {selectedExample !== 'bybit' && (
+                    <div>
+                      <h4 className="text-lg font-semibold text-green-400 mb-2">Extracted Data:</h4>
+                      <pre className="text-gray-300 bg-gray-800 p-3 rounded">
+                        {JSON.stringify(proofData.extractedParameterValues || {}, null, 2)}
+                      </pre>
+                    </div>
+                  )}
                   
                   <div>
                     <h4 className="text-lg font-semibold text-blue-400 mb-2">Proof Details:</h4>
@@ -291,7 +377,14 @@ function App() {
                   <details className="cursor-pointer">
                     <summary className="text-gray-400 hover:text-gray-300">View Raw Proof Data</summary>
                     <pre className="text-gray-300 overflow-x-auto whitespace-pre-wrap text-sm mt-2">
-                      {JSON.stringify(proofData, null, 2)}
+                      {/* For Bybit, redact sensitive information from raw proof data */}
+                      {selectedExample === 'bybit' 
+                        ? JSON.stringify({
+                            ...proofData,
+                            extractedParameterValues: "*** REDACTED ***"
+                          }, null, 2)
+                        : JSON.stringify(proofData, null, 2)
+                      }
                     </pre>
                   </details>
                 </div>
@@ -304,12 +397,15 @@ function App() {
                   </h3>
                   
                   <div className="space-y-4">
-                    <div>
-                      <h4 className="text-lg font-semibold text-blue-400 mb-2">Extracted Data:</h4>
-                      <pre className="text-gray-300 bg-gray-800 p-3 rounded">
-                        {JSON.stringify(transformedProof.extractedData, null, 2)}
-                      </pre>
-                    </div>
+                    {/* Only show extracted data if NOT Bybit example */}
+                    {selectedExample !== 'bybit' && (
+                      <div>
+                        <h4 className="text-lg font-semibold text-blue-400 mb-2">Extracted Data:</h4>
+                        <pre className="text-gray-300 bg-gray-800 p-3 rounded">
+                          {JSON.stringify(transformedProof.extractedData, null, 2)}
+                        </pre>
+                      </div>
+                    )}
                     
                     <div>
                       <h4 className="text-lg font-semibold text-blue-400 mb-2">Encoded Proof (for Smart Contract):</h4>
@@ -338,3 +434,23 @@ function App() {
 }
 
 export default App;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
