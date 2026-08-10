@@ -21,7 +21,7 @@ This enhanced example demonstrates how to use zk-fetch with Reclaim Protocol in 
 
 ### Prerequisites
 
-1. Node.js (v14 or higher)
+1. Node.js (v24 or higher)
 2. An application ID and secret from [Reclaim Protocol DevTool](https://dev.reclaimprotocol.org/)
 
 ### Installation
